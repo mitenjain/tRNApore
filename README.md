@@ -1,2 +1,2 @@
 # tRNApore
-Analysis pipeline for tRNA data
+Analysis pipeline for tRNA data from single-channel nanopore. Updates to follow...
