@@ -370,12 +370,6 @@ def main(myCommandLine=None):
     modelPath = myCommandLine.args.modelpath
 
     print >> sys.stderr, 'creating kmer current map'
-    kmer_current_dict_trnaT2 = kmer_current_map(os.path.join(modelPath, \
-                                                             'trnaT2_current_map.txt'))
-    kmer_current_dict_trnaT3 = kmer_current_map(os.path.join(modelPath, \
-                                                             'trnaT3_current_map.txt'))
-    kmer_current_dict_trnaT4 = kmer_current_map(os.path.join(modelPath, \
-                                                             'trnaT4_current_map.txt'))
     kmer_current_dict_trnaT5 = kmer_current_map(os.path.join(modelPath, \
                                                              'trnaT5_current_map.txt'))
     kmer_current_dict_trnaT6 = kmer_current_map(os.path.join(modelPath, \
@@ -388,14 +382,11 @@ def main(myCommandLine=None):
     '''
     Construct models: trnaT2, trnaT3, trnaT4
     '''
-    trnaT2_model = model_maker( kmer_current_dict_trnaT2, model_name = 'trnaT2' )
-    trnaT3_model = model_maker( kmer_current_dict_trnaT3, model_name = 'trnaT3' )
-    trnaT4_model = model_maker( kmer_current_dict_trnaT4, model_name = 'trnaT4' )
     trnaT5_model = model_maker( kmer_current_dict_trnaT5, model_name = 'trnaT5' )
     trnaT6_model = model_maker( kmer_current_dict_trnaT6, model_name = 'trnaT6' )
     trnaT7_model = model_maker( kmer_current_dict_trnaT7, model_name = 'trnaT7' )
     trnaT8_model = model_maker( kmer_current_dict_trnaT8, model_name = 'trnaT8' )
-    models = [    trnaT2_model, trnaT3_model, trnaT4_model, trnaT5_model, trnaT6_model, \
+    models = [    trnaT5_model, trnaT6_model, \
                 trnaT7_model, trnaT8_model ]
 #    models[0].write(sys.stdout)
     print >> sys.stderr, 'models done'
@@ -407,19 +398,10 @@ def main(myCommandLine=None):
 #    print >> sys.stdout, column_output_template.format('file', 'start (s)', 'end (s)', \
 #                                                        'trnaT2', 'trnaT3', 'tRNAT4')
 
-    t2 = 0
-    t3 = 0
-    t4 = 0
     t5 = 0
     t6 = 0
     t7 = 0
     t8 = 0
-    t2_as_t3 = 0
-    t2_as_t4 = 0
-    t3_as_t2 = 0
-    t3_as_t4 = 0
-    t4_as_t2 = 0
-    t4_as_t3 = 0
     
     num_events = 0
     fileCount = 0
@@ -441,14 +423,7 @@ def main(myCommandLine=None):
         event_endpoints_list = [i * 100000 for i in end_list]
 
         file.parse(MemoryParse(event_startpoints_list, event_endpoints_list))
-        if label == 't2':
-            min_gain_per_sample = 0.01
-        elif label == 't3':
-            min_gain_per_sample = 0.65
-        elif label == 't4':
-            min_gain_per_sample = 1.50 #1.80
-        else:
-            min_gain_per_sample = 0.1
+        min_gain_per_sample = 0.1
 
         sequences = []
         fine_segmentation = None
@@ -471,17 +446,10 @@ def main(myCommandLine=None):
             # Align event to HMM
             pred = prediction (models, sequences, algorithm = 'viterbi')
             scores = [    float(pred[0][0]), float(pred[1][0]), float(pred[2][0]), \
-                        float(pred[3][0]), float(pred[4][0]), float(pred[5][0]),
-                        float(pred[6][0])    ]
+                        float(pred[3][0])	] 
 #            print fileType, event.start, event.end, scores
 
             classified_model = scores.index(max(scores))
-            if classified_model == 0 and label == 't2':
-                t2 += 1
-            if classified_model == 1 and label == 't3':
-                t3 += 1
-            if classified_model == 2 and label == 't4':
-                t4 += 1
             if classified_model == 3 and label == 't5':
                 t5 += 1
             if classified_model == 4 and label == 't6':
@@ -492,32 +460,13 @@ def main(myCommandLine=None):
                 t8 += 1
             num_events += 1
 
-            if classified_model == 0 and not label == 't2': 
-            # actually it is t2, but misclassified
-                if label == 't3':
-                    t2_as_t3 += 1
-                if label == 't4':
-                    t2_as_t4 += 1
-            if classified_model == 1 and not label == 't3': 
-            # actually it is t3, but misclassified
-                if label == 't2':
-                    t3_as_t2 += 1
-                if label == 't4':
-                    t3_as_t4 += 1
-            if classified_model == 2 and not label == 't4': 
-            # actually it is t4, but misclassified
-                if label == 't2':
-                    t4_as_t2 += 1
-                if label == 't3':
-                    t4_as_t3 += 1
-
             # plot event according to model
 #            plot_event(filename.strip().split('/')[-1], event, \
 #                        model=models[classified_model])
     assert (fileCount > 0), "ERROR: empty directory, no ABF files found"
             
-    print num_events, t2, t3, t4, t5, t6, t7, t8
-    print 'Accuracy = ', round((t2+t3+t4+t5+t6+t7+t8)*100.0/num_events, 2), ' %'
+    print num_events, t5, t6, t7, t8
+    print 'Accuracy = ', round((t5+t6+t7+t8)*100.0/num_events, 2), ' %'
     print >> sys.stderr, '\n', 'total time for the program %.3f' % (time.time()-t0)
 
 if (__name__ == '__main__'):
