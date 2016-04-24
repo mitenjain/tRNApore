@@ -336,16 +336,17 @@ def event_hash(filePath):
         end_times = map(float, stanza[3].strip().split(','))
         filename = start_name.strip().split('>')[-1].split('_start')[0] + '.abf'
         fileClass = filename.strip().split('_')[0]
-        if not filename in class_event_hash.keys():
-            class_event_hash[filename] = {'type':None, 'start_times':[], 'end_times':[]}
-        class_event_hash[filename]['type'] = fileClass
+        filenameKey = filename.strip().split('_')[1]
+        if not filenameKey in class_event_hash.keys():
+            class_event_hash[filenameKey] = {'type':None, 'start_times':[], 'end_times':[]}
+        class_event_hash[filenameKey]['type'] = fileClass
         for start, end in zip(start_times, end_times):
             if start / 1000 >= 1:
                 start = start / 1000.0
                 end = end / 1000.0
                                 
-            class_event_hash[filename]['start_times'].append(start)
-            class_event_hash[filename]['end_times'].append(end)
+            class_event_hash[filenameKey]['start_times'].append(start)
+            class_event_hash[filenameKey]['end_times'].append(end)
 
     coordsFile.close()
 
@@ -428,6 +429,7 @@ def main(myCommandLine=None):
         filenamekey = filename.strip().split('/')[-1]
         fileType = class_event_hash[filenamekey]['type']
         label = fileType.split('_')[0]
+        print fileType
         start_list, end_list = class_event_hash[filenamekey]['start_times'], \
                                 class_event_hash[filenamekey]['end_times']
         if not len(start_list) > 0 and len(end_list) > 0:
