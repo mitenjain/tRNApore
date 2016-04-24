@@ -386,8 +386,8 @@ def main(myCommandLine=None):
     trnaT6_model = model_maker( kmer_current_dict_trnaT6, model_name = 'trnaT6' )
     trnaT7_model = model_maker( kmer_current_dict_trnaT7, model_name = 'trnaT7' )
     trnaT8_model = model_maker( kmer_current_dict_trnaT8, model_name = 'trnaT8' )
-    models = [    trnaT5_model, trnaT6_model, \
-                trnaT7_model, trnaT8_model ]
+    models = [    trnaT5_model, trnaT6_model, trnaT7_model, trnaT8_model ]
+
 #    models[0].write(sys.stdout)
     print >> sys.stderr, 'models done'
 
@@ -447,16 +447,17 @@ def main(myCommandLine=None):
             pred = prediction (models, sequences, algorithm = 'viterbi')
             scores = [    float(pred[0][0]), float(pred[1][0]), float(pred[2][0]), \
                         float(pred[3][0])	] 
+
 #            print fileType, event.start, event.end, scores
 
             classified_model = scores.index(max(scores))
-            if classified_model == 3 and label == 't5':
+            if classified_model == 0 and label == 'T5':
                 t5 += 1
-            if classified_model == 4 and label == 't6':
+            if classified_model == 1 and label == 'T6':
                 t6 += 1
-            if classified_model == 5 and label == 't7':
+            if classified_model == 2 and label == 'T7':
                 t7 += 1
-            if classified_model == 6 and label == 't8':
+            if classified_model == 3 and label == 'T8':
                 t8 += 1
             num_events += 1
 
