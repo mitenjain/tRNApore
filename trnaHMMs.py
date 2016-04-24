@@ -421,8 +421,10 @@ def main(myCommandLine=None):
     t4_as_t3 = 0
     
     num_events = 0
+    fileCount = 0
     class_event_hash = event_hash(filePath)
     for filename in glob.glob(os.path.join(filePath, '*.abf')):
+        fileCount += 1
         filenamekey = filename.strip().split('/')[-1]
         fileType = class_event_hash[filenamekey]['type']
         label = fileType.split('_')[0]
@@ -511,6 +513,7 @@ def main(myCommandLine=None):
             # plot event according to model
 #            plot_event(filename.strip().split('/')[-1], event, \
 #                        model=models[classified_model])
+    assert (fileCount > 0), "ERROR: empty directory, no ABF files found"
             
     print num_events, t2, t3, t4, t5, t6, t7, t8
     print 'Accuracy = ', round((t2+t3+t4+t5+t6+t7+t8)*100.0/num_events, 2), ' %'
