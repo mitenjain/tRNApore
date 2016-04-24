@@ -429,7 +429,6 @@ def main(myCommandLine=None):
         filenamekey = filename.strip().split('/')[-1]
         fileType = class_event_hash[filenamekey]['type']
         label = fileType.split('_')[0]
-        print fileType
         start_list, end_list = class_event_hash[filenamekey]['start_times'], \
                                 class_event_hash[filenamekey]['end_times']
         if not len(start_list) > 0 and len(end_list) > 0:
