@@ -423,7 +423,7 @@ def main(myCommandLine=None):
         event_endpoints_list = [i * 100000 for i in end_list]
 
         file.parse(MemoryParse(event_startpoints_list, event_endpoints_list))
-        min_gain_per_sample = 0.1
+        min_gain_per_sample = 0.05
 
         sequences = []
         fine_segmentation = None
