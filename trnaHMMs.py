@@ -423,7 +423,7 @@ def main(myCommandLine=None):
         event_endpoints_list = [i * 100000 for i in end_list]
 
         file.parse(MemoryParse(event_startpoints_list, event_endpoints_list))
-        min_gain_per_sample = 0.05
+        min_gain_per_sample = 0.25
 
         sequences = []
         fine_segmentation = None
@@ -438,7 +438,8 @@ def main(myCommandLine=None):
             count = 0
             for segment in event.segments:
                 segment_means.append(segment.mean)
-#                print count, '\t', segment.mean, '\t', segment.std
+#                if filenamekey == '16323002-s06.abf':
+#                    print count, '\t', segment.mean, '\t', segment.std
                 count += 1
             sequences.append(segment_means)
             sequences = [segment_means]
