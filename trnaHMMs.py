@@ -378,6 +378,10 @@ def main(myCommandLine=None):
                                                              'trnaT7_current_map.txt'))
     kmer_current_dict_trnaT8 = kmer_current_map(os.path.join(modelPath, \
                                                              'trnaT8_current_map.txt'))
+    kmer_current_dict_trnaT22 = kmer_current_map(os.path.join(modelPath, \
+                                                             'trnaT22_current_map.txt'))
+    kmer_current_dict_adapter_bg = kmer_current_map(os.path.join(modelPath, \
+                                                             'adapter_bg_current_map.txt'))
 
     '''
     Construct models: trnaT2, trnaT3, trnaT4
@@ -386,7 +390,11 @@ def main(myCommandLine=None):
     trnaT6_model = model_maker( kmer_current_dict_trnaT6, model_name = 'trnaT6' )
     trnaT7_model = model_maker( kmer_current_dict_trnaT7, model_name = 'trnaT7' )
     trnaT8_model = model_maker( kmer_current_dict_trnaT8, model_name = 'trnaT8' )
-    models = [    trnaT5_model, trnaT6_model, trnaT7_model, trnaT8_model ]
+    trnaT22_model = model_maker( kmer_current_dict_trnaT22, model_name = 'trnaT22' )
+    adapter_bg_model = model_maker( kmer_current_dict_adapter_bg, \
+                                                       model_name = 'adapter_bg' )
+    models = [    trnaT5_model, trnaT6_model, trnaT7_model, trnaT8_model, \
+                                                trnaT22_model, adapter_bg_model ]
 
 #    models[0].write(sys.stdout)
     print >> sys.stderr, 'models done'
@@ -438,7 +446,7 @@ def main(myCommandLine=None):
             count = 0
             for segment in event.segments:
                 segment_means.append(segment.mean)
-#                if filenamekey == '16323002-s06.abf':
+#                if filenamekey == '16427002-s06.abf':
 #                    print count, '\t', segment.mean, '\t', segment.std
                 count += 1
             sequences.append(segment_means)
