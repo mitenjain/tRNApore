@@ -410,7 +410,9 @@ def main(myCommandLine=None):
     t6 = 0
     t7 = 0
     t8 = 0
-    
+    t22 = 0
+    t_bg = 0
+
     num_events = 0
     fileCount = 0
     class_event_hash = event_hash(filePath)
@@ -455,7 +457,7 @@ def main(myCommandLine=None):
             # Align event to HMM
             pred = prediction (models, sequences, algorithm = 'viterbi')
             scores = [    float(pred[0][0]), float(pred[1][0]), float(pred[2][0]), \
-                        float(pred[3][0])	] 
+                        float(pred[3][0]), float(pred[4][0]), float(pred[5][0]) ] 
 
 #            print fileType, event.start, event.end, scores
 
@@ -468,6 +470,10 @@ def main(myCommandLine=None):
                 t7 += 1
             if classified_model == 3 and label == 'T8':
                 t8 += 1
+            if classified_model == 4 and label == 'T22':
+                t22 += 1
+            if classified_model == 5 and label == 'T19':
+                t_bg += 1
             num_events += 1
 
             # plot event according to model
@@ -475,8 +481,8 @@ def main(myCommandLine=None):
 #                        model=models[classified_model])
     assert (fileCount > 0), "ERROR: empty directory, no ABF files found"
             
-    print num_events, t5, t6, t7, t8
-    print 'Accuracy = ', round((t5+t6+t7+t8)*100.0/num_events, 2), ' %'
+    print num_events, t5, t6, t7, t8, t22, t_bg
+    print 'Accuracy = ', round((t5+t6+t7+t8+t22+t_bg)*100.0/num_events, 2), ' %'
     print >> sys.stderr, '\n', 'total time for the program %.3f' % (time.time()-t0)
 
 if (__name__ == '__main__'):
