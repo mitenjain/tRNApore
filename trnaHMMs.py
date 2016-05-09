@@ -378,6 +378,8 @@ def main(myCommandLine=None):
                                                              'trnaT7_current_map.txt'))
     kmer_current_dict_trnaT8 = kmer_current_map(os.path.join(modelPath, \
                                                              'trnaT8_current_map.txt'))
+    kmer_current_dict_trnaT19 = kmer_current_map(os.path.join(modelPath, \
+                                                             'trnaT19_current_map.txt'))
     kmer_current_dict_trnaT22 = kmer_current_map(os.path.join(modelPath, \
                                                              'trnaT22_current_map.txt'))
     kmer_current_dict_adapter_bg = kmer_current_map(os.path.join(modelPath, \
@@ -390,11 +392,12 @@ def main(myCommandLine=None):
     trnaT6_model = model_maker( kmer_current_dict_trnaT6, model_name = 'trnaT6' )
     trnaT7_model = model_maker( kmer_current_dict_trnaT7, model_name = 'trnaT7' )
     trnaT8_model = model_maker( kmer_current_dict_trnaT8, model_name = 'trnaT8' )
+    trnaT19_model = model_maker( kmer_current_dict_trnaT19, model_name = 'trnaT19' )
     trnaT22_model = model_maker( kmer_current_dict_trnaT22, model_name = 'trnaT22' )
     adapter_bg_model = model_maker( kmer_current_dict_adapter_bg, \
                                                        model_name = 'adapter_bg' )
     models = [    trnaT5_model, trnaT6_model, trnaT7_model, trnaT8_model, \
-                                                trnaT22_model, adapter_bg_model ]
+                                 trnaT19_model, trnaT22_model, adapter_bg_model ]
 
 #    models[0].write(sys.stdout)
     print >> sys.stderr, 'models done'
@@ -410,6 +413,7 @@ def main(myCommandLine=None):
     t6 = 0
     t7 = 0
     t8 = 0
+    t19 = 0
     t22 = 0
     t_bg = 0
 
@@ -448,7 +452,7 @@ def main(myCommandLine=None):
             count = 0
             for segment in event.segments:
                 segment_means.append(segment.mean)
-#                if filenamekey == '16427002-s06.abf':
+#                if filenamekey == '16323002-s06.abf' and label == 'BG':
 #                    print count, '\t', segment.mean, '\t', segment.std
                 count += 1
             sequences.append(segment_means)
@@ -456,8 +460,9 @@ def main(myCommandLine=None):
 
             # Align event to HMM
             pred = prediction (models, sequences, algorithm = 'viterbi')
-            scores = [    float(pred[0][0]), float(pred[1][0]), float(pred[2][0]), \
-                        float(pred[3][0]), float(pred[4][0]), float(pred[5][0]) ] 
+            scores = [ float(pred[0][0]), float(pred[1][0]), float(pred[2][0]), \
+                       float(pred[3][0]), float(pred[4][0]), float(pred[5][0]), \
+                       float(pred[6][0]) ] 
 
 #            print fileType, event.start, event.end, scores
 
@@ -470,9 +475,11 @@ def main(myCommandLine=None):
                 t7 += 1
             if classified_model == 3 and label == 'T8':
                 t8 += 1
-            if classified_model == 4 and label == 'T22':
+            if classified_model == 4 and label == 'T19':
+                t19 += 1
+            if classified_model == 5 and label == 'T22':
                 t22 += 1
-            if classified_model == 5 and label == 'T19':
+            if classified_model == 6: # and label == 'BG':
                 t_bg += 1
             num_events += 1
 
@@ -481,8 +488,8 @@ def main(myCommandLine=None):
 #                        model=models[classified_model])
     assert (fileCount > 0), "ERROR: empty directory, no ABF files found"
             
-    print num_events, t5, t6, t7, t8, t22, t_bg
-    print 'Accuracy = ', round((t5+t6+t7+t8+t22+t_bg)*100.0/num_events, 2), ' %'
+    print num_events, t5, t6, t7, t8, t19, t22, t_bg
+    print 'Accuracy = ', round((t5+t6+t7+t8+t19+t22+t_bg)*100.0/num_events, 2), ' %'
     print >> sys.stderr, '\n', 'total time for the program %.3f' % (time.time()-t0)
 
 if (__name__ == '__main__'):
