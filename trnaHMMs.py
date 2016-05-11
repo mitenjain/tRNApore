@@ -378,8 +378,12 @@ def main(myCommandLine=None):
                                                              'trnaT7_current_map.txt'))
     kmer_current_dict_trnaT8 = kmer_current_map(os.path.join(modelPath, \
                                                              'trnaT8_current_map.txt'))
+    kmer_current_dict_trnaT12 = kmer_current_map(os.path.join(modelPath, \
+                                                             'trnaT12_current_map.txt'))
     kmer_current_dict_trnaT19 = kmer_current_map(os.path.join(modelPath, \
                                                              'trnaT19_current_map.txt'))
+    kmer_current_dict_trnaT21 = kmer_current_map(os.path.join(modelPath, \
+                                                             'trnaT21_current_map.txt'))
     kmer_current_dict_trnaT22 = kmer_current_map(os.path.join(modelPath, \
                                                              'trnaT22_current_map.txt'))
     kmer_current_dict_adapter_bg = kmer_current_map(os.path.join(modelPath, \
@@ -392,30 +396,33 @@ def main(myCommandLine=None):
     trnaT6_model = model_maker( kmer_current_dict_trnaT6, model_name = 'trnaT6' )
     trnaT7_model = model_maker( kmer_current_dict_trnaT7, model_name = 'trnaT7' )
     trnaT8_model = model_maker( kmer_current_dict_trnaT8, model_name = 'trnaT8' )
+    trnaT12_model = model_maker( kmer_current_dict_trnaT12, model_name = 'trnaT12' )
     trnaT19_model = model_maker( kmer_current_dict_trnaT19, model_name = 'trnaT19' )
+    trnaT21_model = model_maker( kmer_current_dict_trnaT21, model_name = 'trnaT21' )
     trnaT22_model = model_maker( kmer_current_dict_trnaT22, model_name = 'trnaT22' )
     adapter_bg_model = model_maker( kmer_current_dict_adapter_bg, \
                                                        model_name = 'adapter_bg' )
-    models = [    trnaT5_model, trnaT6_model, trnaT7_model, trnaT8_model, \
-                                 trnaT19_model, trnaT22_model, adapter_bg_model ]
+    models = [ trnaT5_model, trnaT6_model, trnaT7_model, trnaT8_model, trnaT12_model, \
+               trnaT19_model, trnaT21_model, trnaT22_model, adapter_bg_model ]
 
 #    models[0].write(sys.stdout)
     print >> sys.stderr, 'models done'
 
     viterbi_prediction = []
     # printing template
-    column_output_template = '{0:>} {1:>25} {2:>15} {3:>15} {4:>15} {5:>15}'
-    data_output_template = '{0:>} {1:>20.2f} {2:>15.2f} {3:>15.2f} {4:>15.2f} {5:>15.2f}'
-#    print >> sys.stdout, column_output_template.format('file', 'start (s)', 'end (s)', \
-#                                                        'trnaT2', 'trnaT3', 'tRNAT4')
+    column_output_template = '{0:>} {1:>5} {2:>5} {3:>5} {4:>5} {5:>5} {6:>5} {7:>5} {8:>5}'
+    data_output_template = '{0:>d} {1:>5d} {2:>5d} {3:>5d} {4:>5d} {5:>5d} {6:>5d} {7:>5d} {8:>5d}'
 
     t5 = 0
     t6 = 0
     t7 = 0
     t8 = 0
+    t12 = 0
     t19 = 0
+    t21 = 0
     t22 = 0
     t_bg = 0
+    accuracy = 0.0
 
     num_events = 0
     fileCount = 0
@@ -452,7 +459,7 @@ def main(myCommandLine=None):
             count = 0
             for segment in event.segments:
                 segment_means.append(segment.mean)
-#                if filenamekey == '16323002-s06.abf' and label == 'BG':
+#                if filenamekey == '16504003-s06.abf':
 #                    print count, '\t', segment.mean, '\t', segment.std
                 count += 1
             sequences.append(segment_means)
@@ -462,7 +469,7 @@ def main(myCommandLine=None):
             pred = prediction (models, sequences, algorithm = 'viterbi')
             scores = [ float(pred[0][0]), float(pred[1][0]), float(pred[2][0]), \
                        float(pred[3][0]), float(pred[4][0]), float(pred[5][0]), \
-                       float(pred[6][0]) ] 
+                       float(pred[6][0]), float(pred[7][0]), float(pred[8][0]) ] 
 
 #            print fileType, event.start, event.end, scores
 
@@ -475,21 +482,32 @@ def main(myCommandLine=None):
                 t7 += 1
             if classified_model == 3 and label == 'T8':
                 t8 += 1
-            if classified_model == 4 and label == 'T19':
+            if classified_model == 4 and label == 'T12':
+                t12 += 1
+            if classified_model == 5 and label == 'T19':
                 t19 += 1
-            if classified_model == 5 and label == 'T22':
+            if classified_model == 6 and label == 'T21':
+                t21 += 1
+            if classified_model == 7 and label == 'T22':
                 t22 += 1
-            if classified_model == 6: # and label == 'BG':
+            if classified_model == 8: # and label == 'BG':
                 t_bg += 1
             num_events += 1
 
             # plot event according to model
 #            plot_event(filename.strip().split('/')[-1], event, \
 #                        model=models[classified_model])
-    assert (fileCount > 0), "ERROR: empty directory, no ABF files found"
-            
-    print num_events, t5, t6, t7, t8, t19, t22, t_bg
-    print 'Accuracy = ', round((t5+t6+t7+t8+t19+t22+t_bg)*100.0/num_events, 2), ' %'
+
+    # now print stuff
+    assert (fileCount > 0), 'ERROR: empty directory, no ABF files found'
+    accuracy = round((t5+t6+t7+t8+t12+t19+t21+t22+t_bg)*100.0/num_events, 2)
+    print >> sys.stdout, 'Alignment results\n'
+    print >> sys.stdout, column_output_template.format('T5', 'T6', 'T7', 'T8', 'T12', \
+                         'T19', 'T21', 'T22', 'BG')
+    print >> sys.stdout, data_output_template.format(t5, t6, t7, t8, t12, t19, t21, \
+                         t22, t_bg) 
+    print >> sys.stdout, '# events', num_events
+    print >> sys.stdout, '% accuracy = ', accuracy
     print >> sys.stderr, '\n', 'total time for the program %.3f' % (time.time()-t0)
 
 if (__name__ == '__main__'):
