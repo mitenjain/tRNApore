@@ -500,7 +500,7 @@ def main(myCommandLine=None):
 
     # now print stuff
     assert (fileCount > 0), 'ERROR: empty directory, no ABF files found'
-    accuracy = round((t5+t6+t7+t8+t12+t19+t21+t22+t_bg)*100.0/num_events, 2)
+    accuracy = round((t5+t6+t7+t8+t12+t19+t21+t22)*100.0/(num_events-t_bg), 2)
     print >> sys.stdout, 'Alignment results\n'
     print >> sys.stdout, column_output_template.format('T5', 'T6', 'T7', 'T8', 'T12', \
                          'T19', 'T21', 'T22', 'BG')
