@@ -280,7 +280,7 @@ def model_maker(kmer_current_dict, model_name=None):
                                                 model_name)
     return model
 
-def prediction(models, sequences, algorithm = 'forward_backward'):
+def prediction(models, sequences, algorithm = 'forward-backward'):
 
     # Predict sequence from HMM using a user-specified algorithm
     # Forward-Backward (default) or Viterbi
@@ -289,7 +289,7 @@ def prediction(models, sequences, algorithm = 'forward_backward'):
         for model in models:
             if algorithm == 'viterbi':
                 sequence_from_hmm.append(model.viterbi(sequences[i]))
-            elif algorithm == 'forward_backward':
+            elif algorithm == 'forward-backward':
                 sequence_from_hmm.append(model.forward_backward(sequences[i]))
     return sequence_from_hmm
 
@@ -466,7 +466,7 @@ def main(myCommandLine=None):
             sequences = [segment_means]
 
             # Align event to HMM
-            pred = prediction (models, sequences, algorithm = 'viterbi')
+            pred = prediction(models, sequences, algorithm = 'viterbi')
             scores = [ float(pred[0][0]), float(pred[1][0]), float(pred[2][0]), \
                        float(pred[3][0]), float(pred[4][0]), float(pred[5][0]), \
                        float(pred[6][0]), float(pred[7][0]), float(pred[8][0]) ] 
