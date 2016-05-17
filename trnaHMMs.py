@@ -310,7 +310,7 @@ class HMM_Constructor():
             drop = 0.001
             # Transitions for going to Blip State
             blip = 0.005
-            blip_self = 0.01
+            blip_self = 0.1
             # Back Slips, short and long
             slip = 0.05 if index > 0 else 0.00
             # Only short backslips possible
