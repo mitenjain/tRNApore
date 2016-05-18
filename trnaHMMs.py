@@ -374,12 +374,16 @@ def main(myCommandLine=None):
                                                              'trnaT8_current_map.txt'))
     kmer_current_dict_trnaT12 = kmer_current_map(os.path.join(modelPath, \
                                                              'trnaT12_current_map.txt'))
+    kmer_current_dict_trnaT15 = kmer_current_map(os.path.join(modelPath, \
+                                                             'trnaT15_current_map.txt'))
     kmer_current_dict_trnaT19 = kmer_current_map(os.path.join(modelPath, \
                                                              'trnaT19_current_map.txt'))
     kmer_current_dict_trnaT21 = kmer_current_map(os.path.join(modelPath, \
                                                              'trnaT21_current_map.txt'))
     kmer_current_dict_trnaT22 = kmer_current_map(os.path.join(modelPath, \
                                                              'trnaT22_current_map.txt'))
+    kmer_current_dict_trnaT23 = kmer_current_map(os.path.join(modelPath, \
+                                                             'trnaT23_current_map.txt'))
     kmer_current_dict_adapter_bg = kmer_current_map(os.path.join(modelPath, \
                                                              'adapter_bg_current_map.txt'))
 
@@ -391,13 +395,16 @@ def main(myCommandLine=None):
     trnaT7_model = model_maker( kmer_current_dict_trnaT7, model_name = 'trnaT7' )
     trnaT8_model = model_maker( kmer_current_dict_trnaT8, model_name = 'trnaT8' )
     trnaT12_model = model_maker( kmer_current_dict_trnaT12, model_name = 'trnaT12' )
+    trnaT15_model = model_maker( kmer_current_dict_trnaT15, model_name = 'trnaT15' )
     trnaT19_model = model_maker( kmer_current_dict_trnaT19, model_name = 'trnaT19' )
     trnaT21_model = model_maker( kmer_current_dict_trnaT21, model_name = 'trnaT21' )
     trnaT22_model = model_maker( kmer_current_dict_trnaT22, model_name = 'trnaT22' )
+    trnaT23_model = model_maker( kmer_current_dict_trnaT23, model_name = 'trnaT23' )
     adapter_bg_model = model_maker( kmer_current_dict_adapter_bg, \
                                                        model_name = 'adapter_bg' )
     models = [ trnaT5_model, trnaT6_model, trnaT7_model, trnaT8_model, trnaT12_model, \
-               trnaT19_model, trnaT21_model, trnaT22_model, adapter_bg_model ]
+               trnaT15_model, trnaT19_model, trnaT21_model, trnaT22_model, trnaT23_model, \
+               adapter_bg_model ]
 
 #    models[0].write(sys.stdout)
     print >> sys.stderr, 'models done'
@@ -412,21 +419,25 @@ def main(myCommandLine=None):
     t7 = 0
     t8 = 0
     t12 = 0
+    t15 = 0
     t19 = 0
     t21 = 0
     t22 = 0
+    t23 = 0
     t_bg = 0
     accuracy = 0.0
 
     matrix = {'T5':{}, 'T6':{}, 'T7':{}, 'T8':{}, 'T12':{}, 'T19':{}, 'T21':{}, 'T22':{}}
-    matrix['T5'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0}
-    matrix['T6'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0}
-    matrix['T7'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0}
-    matrix['T8'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0}
-    matrix['T12'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0}
-    matrix['T19'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0}
-    matrix['T21'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0}
-    matrix['T22'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0}
+    matrix['T5'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
+    matrix['T6'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
+    matrix['T7'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
+    matrix['T8'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
+    matrix['T12'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
+    matrix['T15'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
+    matrix['T19'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
+    matrix['T21'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
+    matrix['T22'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
+    matrix['T23'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
 
     num_events = 0
     fileCount = 0
@@ -473,7 +484,8 @@ def main(myCommandLine=None):
             pred = prediction(models, sequences, algorithm = 'viterbi')
             scores = [ float(pred[0][0]), float(pred[1][0]), float(pred[2][0]), \
                        float(pred[3][0]), float(pred[4][0]), float(pred[5][0]), \
-                       float(pred[6][0]), float(pred[7][0]), float(pred[8][0]) ] 
+                       float(pred[6][0]), float(pred[7][0]), float(pred[8][0]), \
+                       float(pred[9][0]), float(pred[10][0]) ] 
 
 #            print fileType, event.start, event.end, scores
 
@@ -488,13 +500,17 @@ def main(myCommandLine=None):
                 t8 += 1
             if classified_model == 4 and label == 'T12':
                 t12 += 1
-            if classified_model == 5 and label == 'T19':
+            if classified_model == 5 and label == 'T15':
+                t15 += 1
+            if classified_model == 6 and label == 'T19':
                 t19 += 1
-            if classified_model == 6 and label == 'T21':
+            if classified_model == 7 and label == 'T21':
                 t21 += 1
-            if classified_model == 7 and label == 'T22':
+            if classified_model == 8 and label == 'T22':
                 t22 += 1
-            if classified_model == 8: # and label == 'BG':
+            if classified_model == 9 and label == 'T23':
+                t23 += 1
+            if classified_model == 10: # and label == 'BG':
                 t_bg += 1
             num_events += 1
 
@@ -505,16 +521,17 @@ def main(myCommandLine=None):
 
     # now print stuff
     assert (fileCount > 0), 'ERROR: empty directory, no ABF files found'
-    accuracy = round((t5+t6+t7+t8+t12+t19+t21+t22)*100.0/(num_events-t_bg), 2)
+    accuracy = round((t5 + t6 + t7 + t8 + t12 + t15 + t19 + t21 + t22 + t23)*100.0/\
+                    (num_events-t_bg), 2)
     print >> sys.stdout, 'Alignment results\n'
     print >> sys.stdout, column_output_template.format('T5', 'T6', 'T7', 'T8', 'T12', \
-                         'T19', 'T21', 'T22', 'BG')
-    print >> sys.stdout, data_output_template.format(t5, t6, t7, t8, t12, t19, t21, \
-                         t22, t_bg) 
+                         'T15', 'T19', 'T21', 'T22', 'T23', 'BG')
+    print >> sys.stdout, data_output_template.format(t5, t6, t7, t8, t12, t15, t19, t21, \
+                         t22, t23, t_bg) 
     print >> sys.stdout, '# events', num_events
     print >> sys.stdout, '% accuracy = ', accuracy
 
-    classes = ['T5', 'T6', 'T7', 'T8', 'T12', 'T19', 'T21', 'T22']
+    classes = ['T5', 'T6', 'T7', 'T8', 'T12', 'T15', 'T19', 'T21', 'T22', 'T23']
     for type in classes:
         print >> sys.stdout, type, matrix[type]
 
