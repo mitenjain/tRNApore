@@ -411,8 +411,8 @@ def main(myCommandLine=None):
 
     viterbi_prediction = []
     # printing template
-    column_output_template = '{0:>} {1:>5} {2:>5} {3:>5} {4:>5} {5:>5} {6:>5} {7:>5} {8:>5}'
-    data_output_template = '{0:>d} {1:>5d} {2:>5d} {3:>5d} {4:>5d} {5:>5d} {6:>5d} {7:>5d} {8:>5d}'
+    column_output_template = '{0:>} {1:>5} {2:>5} {3:>5} {4:>5} {5:>5} {6:>5} {7:>5} {8:>5} {9:>5} {10:>5}'
+    data_output_template = '{0:>d} {1:>5d} {2:>5d} {3:>5d} {4:>5d} {5:>5d} {6:>5d} {7:>5d} {8:>5d} {9:>5d} {10:>5d}'
 
     t5 = 0
     t6 = 0
