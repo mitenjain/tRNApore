@@ -438,9 +438,10 @@ def main(myCommandLine=None):
             pred = prediction(models, sequences, algorithm = 'viterbi')
             scores = [ float(pred[0][0]), float(pred[1][0]) ]
 
-#            print fileType, event.start, event.end, scores
-
             classified_model = scores.index(max(scores))
+
+            print filename, fileType, event.start, event.end, label, classified_model
+
             if classified_model == 0 and label == 'T6bA21':
                 t6bA21 += 1
             if classified_model == 1 and label == 'T6bA22':
