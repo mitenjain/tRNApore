@@ -29,13 +29,6 @@ from optparse import OptionParser
 ########################################################################
 
 ########################################################################
-# Argument parser for specifying they type of HMM to be constructed
-########################################################################
-
-class CommandLine(object) :    
-
-
-########################################################################
 # Create all possible kmers
 ########################################################################
 
@@ -340,18 +333,10 @@ def main(myCommandLine=None):
     trnafMet_model = model_maker(kmer_current_dict_trnafMet, model_name = 'fMet')
     trnaLys_model = model_maker(kmer_current_dict_trnaLys, model_name = 'Lys')
     trnaPhe_model = model_maker(kmer_current_dict_trnaPhe, model_name = 'Phe')
-    #trnaT7_model = model_maker(kmer_current_dict_trnaT7, model_name = 'T7')
-    #trnaT8_model = model_maker(kmer_current_dict_trnaT8, model_name = 'T8')
-    #trnaT12_model = model_maker(kmer_current_dict_trnaT12, model_name = 'T12')
-    #trnaT15_model = model_maker(kmer_current_dict_trnaT15, model_name = 'T15')
-    #trnaT19_model = model_maker(kmer_current_dict_trnaT19, model_name = 'T19')
-    #trnaT21_model = model_maker(kmer_current_dict_trnaT21, model_name = 'T21')
-    #trnaT22_model = model_maker(kmer_current_dict_trnaT22, model_name = 'T22')
-    #trnaT23_model = model_maker(kmer_current_dict_trnaT23, model_name = 'T23')
-    models = [trnaT6b_model, trnaT12b_model]
+    models = [trnafMet_model, trnaLys_model, trnaPhe_model]
 
 #    models[0].write(sys.stdout)
-    print >> sys.stderr, 'models done'
+    print('models done', file=sys.stderr)
 
     # Create blank templates for every model file
     viterbi_prediction = []
