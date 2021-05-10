@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-# Bryan Thornlow
-# trnaFast5HMMs.py
-# Uses Adam Novak's yahmm.py and Jacob Schreiber's PyPore
-# Adapted from Miten Jain's trnaHMMs.py
+
+########################################################################
+# hmm.py
+########################################################################
 
 import sys, string, time, math, glob, os
 import argparse, itertools, collections
@@ -17,6 +17,7 @@ from PyPore.parsers import *
 from Fast5Types import *
 import matplotlib.pyplot as plt
 import seaborn as sns
+from optparse import OptionParser
 
 ########################################################################
 # This program is designed to perform segmentation in parallel and make 
@@ -32,27 +33,6 @@ import seaborn as sns
 ########################################################################
 
 class CommandLine(object) :    
-    '''
-    Argument parser class. The arguments that can be given are:
-    1. Input file/files - Whole path for file or folder containing a list of files
-    2. Processing type - Specifies whether to perform segmentation and post-processing \
-                        or parallel segmentation 
-    '''
-    def __init__(self) :
-        self.parser = argparse.ArgumentParser(description = 'This program segments phi29 \
-                                        DNAP events to be used by hmm scripts downstream', 
-                        epilog = 'The program needs arguments to perform segmentation',
-                        add_help = True, #default is True 
-                        prefix_chars = '-', 
-                        usage = '%(prog)s [options] -option1(default) -option2(required) \
-                                 <input(required) >output(optional)')
-        self.parser.add_argument('-i', '--path_to_files', action = 'store', \
-                                dest='inpath', nargs='?', required = True, \
-                                help='input folder with path')
-        self.parser.add_argument('-m', '--path_to_models', action = 'store', \
-                                dest='modelpath', nargs='?', required = True, \
-                                help='models folder with path')
-        self.args=self.parser.parse_args()
 
 
 ########################################################################
@@ -316,35 +296,40 @@ def main(myCommandLine=None):
 
     t0 = time.time()
 
-    if myCommandLine is None:
-        myCommandLine = CommandLine()
-    else :
-        myCommandLine = CommandLine(['-i', '-m'])
+    #Parse the inputs args/options
+    usageStr = './hmm.py -i ./fast5/ -m ./models/'
+    parser = OptionParser(usage=usageStr, version='%prog 0.1')
 
-    filePath = myCommandLine.args.inpath
-    # ^ fast5 file
-    modelPath = myCommandLine.args.modelpath
-    # ^ tRNA_profiles folder (index/meancurrent/stddev)
+    #Options
+    parser.add_option('-i', dest='fast5', help='fast5 file dir', default='')
+    parser.add_option('-m', dest='models', help='models dir', default='./profiles/')
 
-    print >> sys.stderr, 'creating kmer current map'
+    #Parse the options/arguments
+    options, args = parser.parse_args()
+
+    #Print help message if no input
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(0)
+
+    print(options, file=sys.stderr)
+
+    # fast5 files
+    filePath = options.fast5
+    # tRNA profiles (index/meancurrent/stddev/time)
+    modelPath = options.models
+
+    print('creating kmer current map', file=sys.stderr)
     # CREATE CURRENT MAPS OUT OF MODELPATH
     # kmer_current_dict[index] = [meancurrent, stddev]
     # one dictionary per file where each entry is one line in the file
 
-    #kmer_current_dict_trnaT5 = kmer_current_map(os.path.join(modelPath, 'T5.txt'))
-    kmer_current_dict_trnaT6b = kmer_current_map(os.path.join(modelPath, 'T6b.txt'))
-    kmer_current_dict_trnaT12b = kmer_current_map(os.path.join(modelPath, 'T12b.txt'))
-    #kmer_current_dict_trnaT7 = kmer_current_map(os.path.join(modelPath, 'T7.txt'))
-    #kmer_current_dict_trnaT8 = kmer_current_map(os.path.join(modelPath, 'T8.txt'))
-    #kmer_current_dict_trnaT12 = kmer_current_map(os.path.join(modelPath, 'T12.txt'))
-    #kmer_current_dict_trnaT15 = kmer_current_map(os.path.join(modelPath, 'T15.txt'))
-    #kmer_current_dict_trnaT19 = kmer_current_map(os.path.join(modelPath, 'T19.txt'))
-    #kmer_current_dict_trnaT21 = kmer_current_map(os.path.join(modelPath, 'T21.txt'))
-    #kmer_current_dict_trnaT22 = kmer_current_map(os.path.join(modelPath, 'T22.txt'))
-    #kmer_current_dict_trnaT23 = kmer_current_map(os.path.join(modelPath, 'T23.txt'))
+    kmer_current_dict_trnafMet = kmer_current_map(os.path.join(modelPath, 'fMet.txt'))
+    kmer_current_dict_trnaLts = kmer_current_map(os.path.join(modelPath, 'Lys.txt'))
+    kmer_current_dict_trnaPhe = kmer_current_map(os.path.join(modelPath, 'Phe.txt'))
 
     '''
-    Construct models: trnaT2, trnaT3, trnaT4
+    Construct models: trnafMet, trnaLys, trnaPhe
     '''
     # Build one model for each current_dict / filename in modelpath
     # model_maker takes kmer_list, which is just a list of str numbers that are the keys in that dict
@@ -352,9 +337,9 @@ def main(myCommandLine=None):
     # and mean and stddev for each entry in the kmer_dict.
     # Make HMMs for every file and then add them all to a list called models.
 
-    #trnaT5_model = model_maker(kmer_current_dict_trnaT5, model_name = 'T5')
-    trnaT6b_model = model_maker(kmer_current_dict_trnaT6b, model_name = 'T6b')
-    trnaT12b_model = model_maker(kmer_current_dict_trnaT12b, model_name = 'T12b')
+    trnafMet_model = model_maker(kmer_current_dict_trnafMet, model_name = 'fMet')
+    trnaLys_model = model_maker(kmer_current_dict_trnaLys, model_name = 'Lys')
+    trnaPhe_model = model_maker(kmer_current_dict_trnaPhe, model_name = 'Phe')
     #trnaT7_model = model_maker(kmer_current_dict_trnaT7, model_name = 'T7')
     #trnaT8_model = model_maker(kmer_current_dict_trnaT8, model_name = 'T8')
     #trnaT12_model = model_maker(kmer_current_dict_trnaT12, model_name = 'T12')
@@ -543,7 +528,7 @@ def main(myCommandLine=None):
     for type in classes:
         print >> sys.stdout, type, matrix[type]
 
-    print >> sys.stderr, '\n', 'total time for the program %.3f' % (time.time()-t0)
+    print('\ntotal time for the program %.3f' % (time.time()-t0), file=sys.stderr)
 
 
 
