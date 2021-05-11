@@ -8,7 +8,7 @@
 
 from __future__ import division, print_function
 import sys
-from itertools import tee,chain
+from itertools import tee,izip,chain
 import re
 
 import PyPore
@@ -119,7 +119,7 @@ class MemoryParse( object):
     def parse( self, current ):
         return [ Segment( current=np.array(current[int(s):int(e)], copy=True),
                           start=s,
-                          duration=(e-s) ) for s, e in zip(self.starts, self.ends)]
+                          duration=(e-s) ) for s, e in izip(self.starts, self.ends)]
 
 class lambda_event_parser( parser ):
     '''
@@ -215,7 +215,7 @@ def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b = tee(iterable)
     next(b, None)
-    return zip(a, b)
+    return izip(a, b)
 
 class StatSplit( parser ):
     """
@@ -299,8 +299,8 @@ class StatSplit( parser ):
             return segments
 
         lrs = [self._lr(pair[0],pair[1]) for pair in paired]
-        lefts = [alpha+beta*s for (alpha,beta,var),(s,e) in zip(lrs,paired)]
-        rights = [alpha+beta*e for (alpha,beta,var),(s,e) in zip(lrs,paired)]
+        lefts = [alpha+beta*s for (alpha,beta,var),(s,e) in izip(lrs,paired)]
+        rights = [alpha+beta*e for (alpha,beta,var),(s,e) in izip(lrs,paired)]
         segments = [ Segment( current=current[start:end],
                               start=start,
                               duration=(end-start) ) for start,end in paired ]
@@ -645,7 +645,7 @@ class FilterDerivativeSegmenter( parser ):
         # threshold, with a maximum of one per block 
         split_points = [0] 
 
-        for start, end in it.zip( tics[:-1:2], tics[1::2] ): # For all pairs of edges for a block..
+        for start, end in it.izip( tics[:-1:2], tics[1::2] ): # For all pairs of edges for a block..
             segment = deriv[ start:end ] # Save all derivatives in that block to a segment
             if np.argmax( segment ) > self.high_threshold: # If the maximum derivative in that block is above a threshold..
                 split_points = np.concatenate( ( split_points, [ start, end ] ) ) # Save the edges of the segment 

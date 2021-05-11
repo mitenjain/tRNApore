@@ -273,11 +273,11 @@ def plot_event(filename, event, model):
     plt.subplot(212)
     plt.grid()
     event.plot(color='hmm', hmm=model, cmap='Set1')
-    plt.show()
-#    fig_name = filename + '_' + str(event.start) + '_' + str(event.end) + '.png'
-#    plt.tight_layout()
-#    plt.savefig(fig_name, format='png')
-#    plt.close()
+    #plt.show()
+    fig_name = filename.strip().split('/')[-1] + '.png'
+    plt.tight_layout()
+    plt.savefig(fig_name, format='png')
+    plt.close()
     
 
 ########################################################################
@@ -305,20 +305,20 @@ def main(myCommandLine=None):
         parser.print_help()
         sys.exit(0)
 
-    print(options, file=sys.stderr)
+    print >> sys.stderr, options
 
     # fast5 files
     filePath = options.fast5
     # tRNA profiles (index/meancurrent/stddev/time)
     modelPath = options.models
 
-    print('creating kmer current map', file=sys.stderr)
+    print 'creating kmer current map'
     # CREATE CURRENT MAPS OUT OF MODELPATH
     # kmer_current_dict[index] = [meancurrent, stddev]
     # one dictionary per file where each entry is one line in the file
 
     kmer_current_dict_trnafMet = kmer_current_map(os.path.join(modelPath, 'fMet.txt'))
-    kmer_current_dict_trnaLts = kmer_current_map(os.path.join(modelPath, 'Lys.txt'))
+    kmer_current_dict_trnaLys = kmer_current_map(os.path.join(modelPath, 'Lys.txt'))
     kmer_current_dict_trnaPhe = kmer_current_map(os.path.join(modelPath, 'Phe.txt'))
 
     '''
@@ -336,7 +336,7 @@ def main(myCommandLine=None):
     models = [trnafMet_model, trnaLys_model, trnaPhe_model]
 
 #    models[0].write(sys.stdout)
-    print('models done', file=sys.stderr)
+    print 'models done'
 
     # Create blank templates for every model file
     viterbi_prediction = []
@@ -344,31 +344,16 @@ def main(myCommandLine=None):
     column_output_template = '{0:>} {1:>5}'
     data_output_template = '{0:>d} {1:>5d}'
 
-    #t5 = 0
-    t6b = 0
-    t12b = 0
-    #t7 = 0
-    #t8 = 0
-    #t12 = 0
-    #t15 = 0
-    #t19 = 0
-    #t21 = 0
-    #t22 = 0
-    #t23 = 0
+    t_fmet = 0
+    t_lys = 0
+    t_phe = 0
     accuracy = 0.0
 
-    matrix = {'T6b':{}, 'T12b':{}}
+    matrix = {'T_fMet':{}, 'T_Lys':{}, 'T_Phe':{}}
     #matrix['T5'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
-    matrix['T6b'] = {0:0, 1:0}
-    matrix['T12b'] = {0:0, 1:0}
-    #matrix['T7'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
-    #matrix['T8'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
-    #matrix['T12'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
-    #matrix['T15'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
-    #matrix['T19'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
-    #matrix['T21'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
-    #matrix['T22'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
-    #matrix['T23'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
+    matrix['T_fMet'] = {0:0, 1:0, 2:0}
+    matrix['T_Lys'] = {0:0, 1:0, 2:0}
+    matrix['T_Phe'] = {0:0, 1:0, 2:0}
 
     num_events = 0
     fileCount = 0
@@ -381,17 +366,18 @@ def main(myCommandLine=None):
         f5File = h5py.File(filename, 'r')
 
         # Find read number
-        readInd = filename.index('read')
-        readEnd = filename.index('_', readInd)
-        readNum = 'Read_'+str(filename[readInd+4:readEnd])
+      #  print filename.index('')
+      #  readInd = filename.index('read')
+      #  readEnd = filename.index('_', readInd)
+      #  readNum = 'Read_'+str(filename[readInd+4:readEnd])
 
         # File will have either Raw read or Events
         try:
-            read = (f5File['/Raw/Reads/'+readNum])
+            read_id = f5File['/Raw/Reads/'].keys()[0]
+            read = (f5File['/Raw/Reads/'+read_id])
             signal = (read['Signal']).value
         except:
-            read = (f5File['/Analyses/EventDetection_000/Reads/'+readNum])
-            signal = (read['Events']).value
+            print >> sys.stderr, 'Unsupported data type'
 
         # Find values to be used for converting current to picoAmperes
         # Create current - numpy array of floats in units pA
@@ -409,7 +395,7 @@ def main(myCommandLine=None):
         # This is fed into Segmenter as second = 1000/timestep
         timestep = 0.05
         #timestep = 1/sampling_rate
-        # ??? sampling_rate = 3012 so would be 0.000332
+        # sampling_rate = 3012 so would be 0.000332
         # looks weirdly smooth using that, horizontal axis VERY small
         # real value probably somewhere on the order of .01
 
@@ -424,7 +410,7 @@ def main(myCommandLine=None):
             duration=len(current), second=1000/timestep))
 
 
-    min_gain_per_sample = 0.08
+    min_gain_per_sample = 0.15
     sequences = []
     fine_segmentation = None
 
@@ -437,14 +423,6 @@ def main(myCommandLine=None):
             timestep = fileset.timesteps[i]
             current = fileset.currents[i]
             second = fileset.seconds[i]
-
-            # Example filename: 
-            # MinION205A_20161101_FNFAB42656_MN18771_sequencing_run_MA_1033_R9_4_tRNA_T6b_11_01_16_91388_ch84_read433_strand.fast5
-            className = filename[filename.find('_tRNA_'):]
-            className = className[className.find('tRNA'):]
-            # Example className: tRNA_T6b_11_01_16_91388_ch84_read433_strand.fast5
-            fileType = className.split('_')[1]
-            # Example fileType: T6b
 
             # Feed event into SpeedyStatSplit, as is done in trnaHMMs.py
             # Alter parameters for best accuracy
@@ -461,7 +439,7 @@ def main(myCommandLine=None):
             # (also write means/std to create profiles)
             # REMEMBER TO COMMENT OUT WHEN NOT MAKING NEW PROFILE FILES!
             #
-            writeFile = open('F5'+str(min_gain_per_sample)+'/'+str(fileType)+'.txt', 'w')
+            writeFile = open('F5'+str(min_gain_per_sample)+'.txt', 'w')
             for segment in event.segments:
                 segment_means.append(segment.mean)
                 writeFile.write(str(count)+'\t'+str(segment.mean)+'\t'+str(segment.std)+'\n')
@@ -475,26 +453,26 @@ def main(myCommandLine=None):
             pred = prediction(models, sequences, algorithm = 'viterbi')
             scores = [float(pred[0][0]), float(pred[1][0])] 
 
-#            print fileType, event.start, event.end, scores
+#            print event.start, event.end, scores
 
             classified_model = scores.index(max(scores))
-            label = fileType
-            if classified_model == 0 and label == 'T6b':
-                t6b += 1
-            if classified_model == 1 and label == 'T12b':
-                t12b += 1
+            label = 'T_Lys'
+            if classified_model == 0 and label == 'T_fMet':
+                t_fmet += 1
+            if classified_model == 1 and label == 'T_Lys':
+                t_lys += 1
+            if classified_model == 1 and label == 'T_Phe':
+                t_phe += 1
             num_events += 1
 
             matrix[label][classified_model] += 1
 
             #for k in pred[classified_model][1]:
                 #print k[1].name
-
             # plot event according to model using plot_event:
             # top plot is segmented event colored in cycle by segments, bottom 
             # subplot is segmented event aligned with HMM, colored by states
-            #plot_event(filename.strip().split('/')[-1], event, \
-            #            model=models[classified_model])
+            plot_event(filename, event, model=models[classified_model])
 
             # iterate through rest of fileset
             i = i + 1
@@ -513,7 +491,7 @@ def main(myCommandLine=None):
     for type in classes:
         print >> sys.stdout, type, matrix[type]
 
-    print('\ntotal time for the program %.3f' % (time.time()-t0), file=sys.stderr)
+    print >> sys.stderr, '\ntotal time for the program %.3f' % (time.time()-t0)
 
 
 
