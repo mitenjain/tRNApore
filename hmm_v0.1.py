@@ -410,7 +410,7 @@ def main(myCommandLine=None):
             duration=len(current), second=1000/timestep))
 
 
-    min_gain_per_sample = 0.15
+    min_gain_per_sample = 0.05
     sequences = []
     fine_segmentation = None
 
