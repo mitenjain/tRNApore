@@ -1,0 +1,8 @@
+./*.png
+./*pyc
+./__pycache__
+./PyPore/*pyc
+./PyPore/__pycache__
+./yahmm/*pyc
+./yahmm/__pycache__
+
