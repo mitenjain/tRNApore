@@ -15,6 +15,8 @@ from yahmm import *
 from PyPore.core import Segment
 from PyPore.parsers import *
 from Fast5Types import *
+import matplotlib as mpl
+mpl.rcParams['figure.dpi'] = 300
 import matplotlib.pyplot as plt
 import seaborn as sns
 from optparse import OptionParser
@@ -87,36 +89,35 @@ class HMM_Constructor():
             current_sd = kmer_current_dict[kmer][1]
             # Transition probabilities for a match state
             # Self-loop to itself
-            self_loop = 0.001
+            self_loop = 0.45
             # End from any state, i.e. reach model.end
-            end = 0.005
+            end = 0.001
             # Transitions for Drop-off State
             drop = 0.001
             # Transitions for going to Blip State
-            blip = 0.005
-            blip_self = 0.1
+            blip = 0.001
+            blip_self = 0.001
             # Back Slips, short and long
-            slip = 0.05 if index > 0 else 0.00
+            slip = 0.001 if index > 0 else 0.00
             # Only short backslips possible
             short_slip = slip
             long_slip = 0.0
             # Transitions from silent slip states
             # Short slip from silent short slip state
-            step_back = 0.60
+            step_back = 0.001
             # Skip that accounts for a missed segment
-            skip = 0.2
+            skip = 0.001
             # Transitions from current skip silent state to the previous match state or 
             # previous silent skip states
-            long_skip = 0.05
+            long_skip = 0.001
             # Transitions for Insert state between two neighboring match states
-            insert = 0.02 if index > 0 else 0.00
+            insert = 0.001 if index > 0 else 0.00
             # Self loop for an insert state
-            ins_self = 0.05
+            ins_self = 0.001
             # Transition to the next match state (Forward Transition)
             # Each match state has transitions out to self_loop, end, drop, blip, slip, 
             # skip, insert, re_read, and forward
             forward = 1 - (self_loop + end + blip + slip + skip + insert)
-
             # Create and Add State
             current_state = yahmm.State(yahmm.NormalDistribution(current_mean, \
                                         current_sd), \
@@ -273,7 +274,7 @@ def plot_event(filename, event, model):
     plt.subplot(212)
     plt.grid()
     event.plot(color='hmm', hmm=model, cmap='Set1')
-    #plt.show()
+#    plt.show()
     fig_name = filename.strip().split('/')[-1] + '.png'
     plt.tight_layout()
     plt.savefig(fig_name, format='png')
@@ -340,9 +341,6 @@ def main(myCommandLine=None):
 
     # Create blank templates for every model file
     viterbi_prediction = []
-    # printing template
-    column_output_template = '{0:>} {1:>5}'
-    data_output_template = '{0:>d} {1:>5d}'
 
     t_fmet = 0
     t_lys = 0
@@ -427,8 +425,8 @@ def main(myCommandLine=None):
             # Feed event into SpeedyStatSplit, as is done in trnaHMMs.py
             # Alter parameters for best accuracy
             if event.duration > 0:
-                event.filter(order=1, cutoff=2000)
-                event.parse(SpeedyStatSplit(min_width=250, max_width=5000000, \
+                event.filter(order=1, cutoff=3000)
+                event.parse(SpeedyStatSplit(min_width=500, max_width=2000, \
                                             min_gain_per_sample=min_gain_per_sample, \
                                             window_width=2000))
 
@@ -439,23 +437,24 @@ def main(myCommandLine=None):
             # (also write means/std to create profiles)
             # REMEMBER TO COMMENT OUT WHEN NOT MAKING NEW PROFILE FILES!
             #
-            writeFile = open('F5'+str(min_gain_per_sample)+'.txt', 'w')
+            #writeFile = open('F5'+str(min_gain_per_sample)+'.txt', 'w')
             for segment in event.segments:
                 segment_means.append(segment.mean)
-                writeFile.write(str(count)+'\t'+str(segment.mean)+'\t'+str(segment.std)+'\n')
+             #   writeFile.write(str(count)+'\t'+str(segment.mean)+'\t'+str(segment.std)+'\n')
                 count += 1
-            writeFile.close()
+            #writeFile.close()
 
             sequences.append(segment_means)
             sequences = [segment_means]
 
             # Align event to HMM
             pred = prediction(models, sequences, algorithm = 'viterbi')
-            scores = [float(pred[0][0]), float(pred[1][0])] 
+            scores = [float(pred[0][0]), float(pred[1][0]), float(pred[2][0])] 
 
-#            print event.start, event.end, scores
+            #print event.start, event.end, scores
 
             classified_model = scores.index(max(scores))
+            #print classified_model
             label = 'T_Lys'
             if classified_model == 0 and label == 'T_fMet':
                 t_fmet += 1
@@ -480,14 +479,17 @@ def main(myCommandLine=None):
 
     # now print stuff
     assert (fileCount > 0), 'ERROR: empty directory, no .fast5 files found'
-    accuracy = round((t6b + t12b)*100.0/(num_events), 2)
+    accuracy = round((t_fmet + t_lys + t_phe)*100.0/(num_events), 2)
+    # printing template
+    column_output_template = '{0:>} {1:>5} {2:>5}'
+    data_output_template = '{0:>d} {1:>5d} {2:>5d}'
     print >> sys.stdout, 'Alignment results\n'
-    print >> sys.stdout, column_output_template.format('T6b', 'T12b')
-    print >> sys.stdout, data_output_template.format(t6b, t12b) 
+    print >> sys.stdout, column_output_template.format('t_fmet', 't_lys', 't_phe')
+    print >> sys.stdout, data_output_template.format(t_fmet, t_lys, t_phe) 
     print >> sys.stdout, '# events', num_events
     print >> sys.stdout, '% accuracy = ', accuracy
 
-    classes = ['T6b', 'T12b']
+    classes = ['T_fMet', 'T_Lys', 'T_Phe']
     for type in classes:
         print >> sys.stdout, type, matrix[type]
 
