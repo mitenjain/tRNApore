@@ -297,6 +297,10 @@ def main(myCommandLine=None):
     #Options
     parser.add_option('-i', dest='fast5', help='fast5 file dir', default='')
     parser.add_option('-m', dest='models', help='models dir', default='./profiles/')
+    
+    parser.add_option('-n', dest='min', help='min_width', type=int, default=650)
+    parser.add_option('-x', dest='max', help='max_width', type=int, default=2500)
+    parser.add_option('-w', dest='win', help='window_width', type=int, default=2000)
 
     #Parse the options/arguments
     options, args = parser.parse_args()
@@ -312,6 +316,10 @@ def main(myCommandLine=None):
     filePath = options.fast5
     # tRNA profiles (index/meancurrent/stddev/time)
     modelPath = options.models
+    # Segmentation parameters
+    minWidth = options.min
+    maxWidth = options.max
+    winWidth = options.win
 
     print 'creating kmer current map'
     # CREATE CURRENT MAPS OUT OF MODELPATH
@@ -426,9 +434,9 @@ def main(myCommandLine=None):
             # Alter parameters for best accuracy
             if event.duration > 0:
                 event.filter(order=1, cutoff=3000)
-                event.parse(SpeedyStatSplit(min_width=500, max_width=2000, \
+                event.parse(SpeedyStatSplit(min_width=minWidth, max_width=maxWidth, \
                                             min_gain_per_sample=min_gain_per_sample, \
-                                            window_width=2000))
+                                            window_width=winWidth))
 
             segment_means = []
             count = 0
