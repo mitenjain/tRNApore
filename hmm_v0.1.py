@@ -77,8 +77,6 @@ class HMM_Constructor():
         current_short_slip = None
         previous_mean = 0
         previous_sd = 0
-        abasic = False # Abasic flag to trigger allowing re-read
-        abasic_kmer = None # Track the position of abasic XXXX
         states_list = []
 
         for index in range(len(kmer_list)):
@@ -298,9 +296,10 @@ def main(myCommandLine=None):
     parser.add_option('-i', dest='fast5', help='fast5 file dir', default='')
     parser.add_option('-m', dest='models', help='models dir', default='./profiles/')
     
-    parser.add_option('-n', dest='min', help='min_width', type=int, default=650)
-    parser.add_option('-x', dest='max', help='max_width', type=int, default=2500)
+    parser.add_option('-n', dest='min', help='min_width', type=int, default=500)
+    parser.add_option('-x', dest='max', help='max_width', type=int, default=1000)
     parser.add_option('-w', dest='win', help='window_width', type=int, default=2000)
+    parser.add_option('-s', dest='summary', help='sequencing_summary.txt', default='')
 
     #Parse the options/arguments
     options, args = parser.parse_args()
@@ -316,10 +315,33 @@ def main(myCommandLine=None):
     filePath = options.fast5
     # tRNA profiles (index/meancurrent/stddev/time)
     modelPath = options.models
+    # sequencing summary file
+    summaryFile = options.summary
     # Segmentation parameters
     minWidth = options.min
     maxWidth = options.max
     winWidth = options.win
+
+    # read summary file and make a hash of times
+    if not summaryFile == '':
+        print 'reading summary file'
+        id_time = { }
+        summary = open(summaryFile, 'r')
+        summaryHeaders = summary.readline()
+        summaryHeaders = summaryHeaders.strip().split()
+        read_id_index = int(summaryHeaders.index('read_id'))
+        start_time_index = int(summaryHeaders.index('start_time'))
+        template_start_index = int(summaryHeaders.index('template_start'))
+        for line in summary:
+            line = line.strip().split()
+            read_id = line[read_id_index]
+            start_time = float(line[start_time_index])
+            template_start = float(line[template_start_index])
+            rna_strand_time = template_start - start_time
+            id_time[read_id] = rna_strand_time
+    
+        summary.close()
+        print 'summary file parsing complete'
 
     print 'creating kmer current map'
     # CREATE CURRENT MAPS OUT OF MODELPATH
@@ -329,6 +351,7 @@ def main(myCommandLine=None):
     kmer_current_dict_trnafMet = kmer_current_map(os.path.join(modelPath, 'fMet.txt'))
     kmer_current_dict_trnaLys = kmer_current_map(os.path.join(modelPath, 'Lys.txt'))
     kmer_current_dict_trnaPhe = kmer_current_map(os.path.join(modelPath, 'Phe.txt'))
+    kmer_current_dict_adapter_dna_rna = kmer_current_map(os.path.join(modelPath, 'adapter_DNA_RNA.txt'))
 
     '''
     Construct models: trnafMet, trnaLys, trnaPhe
@@ -342,7 +365,9 @@ def main(myCommandLine=None):
     trnafMet_model = model_maker(kmer_current_dict_trnafMet, model_name = 'fMet')
     trnaLys_model = model_maker(kmer_current_dict_trnaLys, model_name = 'Lys')
     trnaPhe_model = model_maker(kmer_current_dict_trnaPhe, model_name = 'Phe')
-    models = [trnafMet_model, trnaLys_model, trnaPhe_model]
+    adapter_dna_rna_model = model_maker(kmer_current_dict_adapter_dna_rna, model_name = 'adapter_dna_rna')
+    models = [trnafMet_model, trnaLys_model, trnaPhe_model, adapter_dna_rna_model]
+    
 
 #    models[0].write(sys.stdout)
     print 'models done'
@@ -353,13 +378,15 @@ def main(myCommandLine=None):
     t_fmet = 0
     t_lys = 0
     t_phe = 0
+    adpt_dna_rna = 0
     accuracy = 0.0
 
-    matrix = {'T_fMet':{}, 'T_Lys':{}, 'T_Phe':{}}
+    matrix = {'T_fMet':{}, 'T_Lys':{}, 'T_Phe':{}, 'adpt_DNA_RNA':{}}
     #matrix['T5'] = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0}
-    matrix['T_fMet'] = {0:0, 1:0, 2:0}
-    matrix['T_Lys'] = {0:0, 1:0, 2:0}
-    matrix['T_Phe'] = {0:0, 1:0, 2:0}
+    matrix['T_fMet'] = {0:0, 1:0, 2:0, 3:0}
+    matrix['T_Lys'] = {0:0, 1:0, 2:0, 3:0}
+    matrix['T_Phe'] = {0:0, 1:0, 2:0, 3:0}
+    matrix['adpt_DNA_RNA'] = {0:0, 1:0, 2:0, 3:0}
 
     num_events = 0
     fileCount = 0
@@ -379,9 +406,11 @@ def main(myCommandLine=None):
 
         # File will have either Raw read or Events
         try:
-            read_id = f5File['/Raw/Reads/'].keys()[0]
-            read = (f5File['/Raw/Reads/'+read_id])
+            read_num = f5File['/Raw/Reads/'].keys()[0]
+            read = (f5File['/Raw/Reads/'+read_num])
+            read_id = read.attrs['read_id']
             signal = (read['Signal']).value
+            rna_time = id_time[read_id]
         except:
             print >> sys.stderr, 'Unsupported data type'
 
@@ -393,9 +422,23 @@ def main(myCommandLine=None):
         f5range = (uniqueKey['channel_id']).attrs['range']
         sampling_rate = (uniqueKey['channel_id']).attrs['sampling_rate']
 
+        raw_time = read.attrs['duration'] # number of points
+        read_time = raw_time / sampling_rate # in seconds
+
         adjusted_signal = (signal+offset)*(f5range/digitisation)
         current = numpy.array(adjusted_signal, dtype=numpy.float)
 
+        # slice to consider in points should be time * sampling rate
+        signal_slice_time = int(rna_time * sampling_rate)
+
+        full_current = current
+        current = current[signal_slice_time:]
+
+        # early tests say that the whole mean of pA for fMet, Lys, and Phe is ~95-98 pA
+        profile_mean = 108.0
+        # we anticipate tRNA + adapter to be ~40% of the ionic current for the strand
+        mean_window = 1 * int(raw_time / 0.2)
+        
         # timestep was fADCSequenceInterval * 1e-3 = .01 for .abf
         # Different for .fast5? standard or make use of sampling interval?
         # This is fed into Segmenter as second = 1000/timestep
@@ -415,8 +458,7 @@ def main(myCommandLine=None):
         fileset.parse(Segment(current=current, start=0, end=(len(current)-1),
             duration=len(current), second=1000/timestep))
 
-
-    min_gain_per_sample = 0.05
+    min_gain_per_sample = 0.10
     sequences = []
     fine_segmentation = None
 
@@ -445,33 +487,39 @@ def main(myCommandLine=None):
             # (also write means/std to create profiles)
             # REMEMBER TO COMMENT OUT WHEN NOT MAKING NEW PROFILE FILES!
             #
-            #writeFile = open('F5'+str(min_gain_per_sample)+'.txt', 'w')
+#             print filename
+#             new_filename = str(filename.replace('/', '_'))
+#             writeFile = open('F5' + new_filename + str(min_gain_per_sample) + '.txt', 'w')
+#             writeFile = open('F5' + str(min_gain_per_sample) + '.txt', 'w')
             for segment in event.segments:
                 segment_means.append(segment.mean)
-             #   writeFile.write(str(count)+'\t'+str(segment.mean)+'\t'+str(segment.std)+'\n')
+#                 writeFile.write(str(count)+'\t'+str(segment.mean)+'\t'+str(segment.std)+'\n')
                 count += 1
-            #writeFile.close()
+#             writeFile.close()
 
             sequences.append(segment_means)
             sequences = [segment_means]
 
             # Align event to HMM
             pred = prediction(models, sequences, algorithm = 'viterbi')
-            scores = [float(pred[0][0]), float(pred[1][0]), float(pred[2][0])] 
+            scores = [float(pred[0][0]), float(pred[1][0]), float(pred[2][0]), float(pred[3][0])] 
 
-            #print event.start, event.end, scores
+#             print event.start, event.end, scores
 
             classified_model = scores.index(max(scores))
-            #print classified_model
+#             print classified_model
             label = 'T_Lys'
             if classified_model == 0 and label == 'T_fMet':
                 t_fmet += 1
             if classified_model == 1 and label == 'T_Lys':
                 t_lys += 1
-            if classified_model == 1 and label == 'T_Phe':
+            if classified_model == 2 and label == 'T_Phe':
                 t_phe += 1
+            if classified_model == 3 and label == 'adpt_DNA_RNA':
+                adpt_dna_rna += 1
             num_events += 1
 
+#             print matrix
             matrix[label][classified_model] += 1
 
             #for k in pred[classified_model][1]:
@@ -492,12 +540,12 @@ def main(myCommandLine=None):
     column_output_template = '{0:>} {1:>5} {2:>5}'
     data_output_template = '{0:>d} {1:>5d} {2:>5d}'
     print >> sys.stdout, 'Alignment results\n'
-    print >> sys.stdout, column_output_template.format('t_fmet', 't_lys', 't_phe')
-    print >> sys.stdout, data_output_template.format(t_fmet, t_lys, t_phe) 
+    print >> sys.stdout, column_output_template.format('t_fmet', 't_lys', 't_phe', 'adpt_dna_rna')
+    print >> sys.stdout, data_output_template.format(t_fmet, t_lys, t_phe, adpt_dna_rna) 
     print >> sys.stdout, '# events', num_events
     print >> sys.stdout, '% accuracy = ', accuracy
 
-    classes = ['T_fMet', 'T_Lys', 'T_Phe']
+    classes = ['T_fMet', 'T_Lys', 'T_Phe', 'adpt_DNA_RNA']
     for type in classes:
         print >> sys.stdout, type, matrix[type]
 

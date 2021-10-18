@@ -1,0 +1,57 @@
+2021-10-17 23:49:26.100546 [guppy/message] ONT Guppy basecalling software version 5.0.16+b9fcd7b5b
+config file:        ../guppy/ont-guppy-cpu/data/rna_r9.4.1_70bps_hac.cfg
+model file:         /Users/miten/Downloads/tRNA/guppy/ont-guppy-cpu/data/template_rna_r9.4.1_70bps_hac.jsn
+input path:         ./testFiles/
+save path:          testFilesGuppy
+chunk size:         2000
+chunks per runner:  512
+minimum qscore:     7
+records per file:   4000
+num basecallers:    1
+cpu mode:           ON
+threads per caller: 4
+
+2021-10-17 23:49:26.102481 [guppy/info] crashpad_handler not supported on this platform.
+2021-10-17 23:49:26.233352 [guppy/message] Found 12 fast5 files to process.
+2021-10-17 23:49:26.233589 [guppy/message] Init time: 129 ms
+2021-10-17 23:49:26.239483 [guppy/info] Read '0ef7e751-f32f-4526-a1e1-af977042de7b' from file "syn_Phe_1.fast5" has been loaded.
+2021-10-17 23:49:26.241969 [guppy/info] Read '0f4fdd46-4992-49fe-ae75-1f5edb72b07c' from file "syn_Lys_1.fast5" has been loaded.
+2021-10-17 23:49:26.245581 [guppy/info] Read '4b2a01ee-b62d-4a90-b4ce-e8f9684f3a44' from file "bio_fMet_1.fast5" has been loaded.
+2021-10-17 23:49:26.249266 [guppy/info] Read '2bccfae0-8a2a-48ab-abee-5477e6d0351b' from file "bio_Phe_1.fast5" has been loaded.
+2021-10-17 23:49:26.251825 [guppy/info] Read '3eeb9b52-3495-46f3-b19c-d1168deaa76f' from file "syn_fMet_2.fast5" has been loaded.
+2021-10-17 23:49:26.254316 [guppy/info] Read '00dc09f3-e821-4afc-9ea1-cd613e964936' from file "bio_Lys_1.fast5" has been loaded.
+2021-10-17 23:49:26.257865 [guppy/info] Read '6a402505-617c-4969-a56c-02416093d66f' from file "syn_Phe_2.fast5" has been loaded.
+2021-10-17 23:49:26.260173 [guppy/info] Read '0f660fe5-f18a-4e05-af49-2c3fcc176e0c' from file "syn_Lys_2.fast5" has been loaded.
+2021-10-17 23:49:26.262575 [guppy/info] Read '2acd612d-5d5b-4c5c-b287-e5f5fd37de82' from file "syn_fMet_1.fast5" has been loaded.
+2021-10-17 23:49:26.265993 [guppy/info] Read '3b7d2d82-92e8-4266-a37a-6ea593865ecf' from file "bio_Phe_2.fast5" has been loaded.
+2021-10-17 23:49:26.268282 [guppy/info] Read '5ee5fa8d-b504-48cf-82c3-6a97087253b3' from file "bio_fMet_2.fast5" has been loaded.
+2021-10-17 23:49:26.270489 [guppy/info] Read '0fd146a8-ceac-4feb-a1bf-fe14d8f89cb0' from file "bio_Lys_2.fast5" has been loaded.
+2021-10-17 23:49:26.270562 [guppy/info] Dispatched batch 0 containing 12 inputs:
+2021-10-17 23:49:26.270585 [guppy/info] Batch input 0 : ./testFiles/syn_Phe_1.fast5
+2021-10-17 23:49:26.270599 [guppy/info] Batch input 0 : ./testFiles/syn_Lys_1.fast5
+2021-10-17 23:49:26.270611 [guppy/info] Batch input 0 : ./testFiles/bio_fMet_1.fast5
+2021-10-17 23:49:26.270623 [guppy/info] Batch input 0 : ./testFiles/bio_Phe_1.fast5
+2021-10-17 23:49:26.270635 [guppy/info] Batch input 0 : ./testFiles/syn_fMet_2.fast5
+2021-10-17 23:49:26.270646 [guppy/info] Batch input 0 : ./testFiles/bio_Lys_1.fast5
+2021-10-17 23:49:26.270658 [guppy/info] Batch input 0 : ./testFiles/syn_Phe_2.fast5
+2021-10-17 23:49:26.270669 [guppy/info] Batch input 0 : ./testFiles/syn_Lys_2.fast5
+2021-10-17 23:49:26.270681 [guppy/info] Batch input 0 : ./testFiles/syn_fMet_1.fast5
+2021-10-17 23:49:26.270692 [guppy/info] Batch input 0 : ./testFiles/bio_Phe_2.fast5
+2021-10-17 23:49:26.270703 [guppy/info] Batch input 0 : ./testFiles/bio_fMet_2.fast5
+2021-10-17 23:49:26.270715 [guppy/info] Batch input 0 : ./testFiles/bio_Lys_2.fast5
+2021-10-17 23:49:26.407301 [guppy/info] Read '0ef7e751-f32f-4526-a1e1-af977042de7b' from file "syn_Phe_1.fast5" completed.
+2021-10-17 23:49:26.520558 [guppy/info] Read '0f4fdd46-4992-49fe-ae75-1f5edb72b07c' from file "syn_Lys_1.fast5" completed.
+2021-10-17 23:49:26.520793 [guppy/info] Read '4b2a01ee-b62d-4a90-b4ce-e8f9684f3a44' from file "bio_fMet_1.fast5" completed.
+2021-10-17 23:49:26.520913 [guppy/info] Read '2bccfae0-8a2a-48ab-abee-5477e6d0351b' from file "bio_Phe_1.fast5" completed.
+2021-10-17 23:49:26.684247 [guppy/info] Read '3eeb9b52-3495-46f3-b19c-d1168deaa76f' from file "syn_fMet_2.fast5" completed.
+2021-10-17 23:49:26.684418 [guppy/info] Read '00dc09f3-e821-4afc-9ea1-cd613e964936' from file "bio_Lys_1.fast5" completed.
+2021-10-17 23:49:26.684544 [guppy/info] Read '6a402505-617c-4969-a56c-02416093d66f' from file "syn_Phe_2.fast5" completed.
+2021-10-17 23:49:26.722266 [guppy/info] Read '0f660fe5-f18a-4e05-af49-2c3fcc176e0c' from file "syn_Lys_2.fast5" completed.
+2021-10-17 23:49:26.722441 [guppy/info] Read '2acd612d-5d5b-4c5c-b287-e5f5fd37de82' from file "syn_fMet_1.fast5" completed.
+2021-10-17 23:49:26.771204 [guppy/info] Read '3b7d2d82-92e8-4266-a37a-6ea593865ecf' from file "bio_Phe_2.fast5" completed.
+2021-10-17 23:49:26.913425 [guppy/info] Read '5ee5fa8d-b504-48cf-82c3-6a97087253b3' from file "bio_fMet_2.fast5" completed.
+2021-10-17 23:49:26.985334 [guppy/info] Read '0fd146a8-ceac-4feb-a1bf-fe14d8f89cb0' from file "bio_Lys_2.fast5" completed.
+2021-10-17 23:49:26.992462 [guppy/info] Completed batch 0
+2021-10-17 23:49:27.060781 [guppy/message] Caller time: 827 ms, Samples called: 104815, samples/s: 126741
+2021-10-17 23:49:27.060883 [guppy/message] Finishing up any open output files.
+2021-10-17 23:49:34.995897 [guppy/message] Basecalling completed successfully.
